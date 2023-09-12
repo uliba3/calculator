@@ -1,112 +1,113 @@
+// Use const and let appropriately
 let arrayNumbers = [0];
 let arrayOperators = [];
-let lastOperator = "";
-arrayNumbers[arrayNumbers.length - 1]
+let arrayBrackets = [''];
 
-function operation(num1, num2, operator){
-    if(operator == "+"){
-        return add(num1, num2);
-    }else if(operator == "-"){
-        return subtract(num1, num2);
-    }else if(operator == "*"){
-        return multiply(num1, num2);
-    }else if(operator == "/"){
-        return divide(num1, num2);
-    }
-}
+// Use an object to map operators to functions
+const operatorsMap = {
+  "+": (num1, num2) => num1 + num2,
+  "-": (num1, num2) => num1 - num2,
+  "*": (num1, num2) => num1 * num2,
+  "/": (num1, num2) => num1 / num2,
+};
 
+// Select elements using querySelector
 const calculator = document.querySelector('.calculator');
 const display = document.querySelector('.display');
 const numpad = document.querySelector('.numpad');
 const operators = document.querySelector('.operators');
 
-let numpadNumbers = [];
-for(let i = 0; i < 10; i++){
-    numpadNumbers[i] = document.createElement('button');
-    numpadNumbers[i].classList.add('numpadNumber');
-    numpadNumbers[i].textContent = `${i}`;
-    numpadNumbers[i].addEventListener('click', function(){
-        arrayNumbers[arrayNumbers.length - 1] *= 10;
-        arrayNumbers[arrayNumbers.length - 1] += i;
-        displayEquation();
-    });
-    numpad.appendChild(numpadNumbers[i]);
+// Create numpad buttons using a loop
+const numpadNumbers = [];
+for (let i = 0; i < 10; i++) {
+  const button = document.createElement('button');
+  button.classList.add('numpadNumber');
+  button.textContent = i;
+  button.addEventListener('click', () => {
+    arrayNumbers[arrayNumbers.length - 1] *= 10;
+    arrayNumbers[arrayNumbers.length - 1] += i;
+    displayEquation();
+  });
+  numpadNumbers.push(button);
+  numpad.appendChild(button);
 }
 
-let operatorMarks = [];
-let operatorMarksArray = ['+', '-', '*', '/', '=', 'clear'];
-for(operatorMark of operatorMarksArray){
-    let i = operatorMarksArray.indexOf(operatorMark)
-    operatorMarks[i] = document.createElement('button');
-    operatorMarks[i].classList.add('operator');
-    operatorMarks[i].textContent = `${operatorMark}`;
-    operatorMarks[i].addEventListener('click', function(){
-        if(operatorMarksArray[i] != '=' && operatorMarksArray[i] != 'clear'){
-            arrayNumbers.push(0);
-            lastOperator = operatorMarksArray[i];
-            arrayOperators.push(lastOperator);
-            displayEquation();
-        }else if(operatorMarksArray[i] == '=') {
-            calculation();
-        }else if(operatorMarksArray[i] == 'clear') {
-            clear();
-        }
-    });
-    operators.appendChild(operatorMarks[i]);
-}
+// Create operator buttons using a loop
+const operatorMarksArray = ['(', ')', '+', '-', '*', '/', '=', 'clear'];
+const operatorMarks = operatorMarksArray.map((operatorMark) => {
+  const button = document.createElement('button');
+  button.classList.add('operator');
+  button.textContent = operatorMark;
+  button.addEventListener('click', () => {
+    handleOperatorClick(operatorMark);
+  });
+  operators.appendChild(button);
+  return button;
+});
 
-function clear(){
-    lastOperator = "";
-    arrayNumbers = [0];
-    arrayOperators = [];
-    display.textContent = "";
-}
-
-function displayEquation(){
-    display.textContent = "";
-    for(let i = 0; i < arrayNumbers.length - 1; i++){
-        display.textContent += `${arrayNumbers[i]} ${arrayOperators[i]} `;
+// Function to handle operator button click
+function handleOperatorClick(operator) {
+  if (operator !== '=' && operator !== 'clear' && operator !== '(' && operator !== ')') {
+    arrayNumbers.push(0);
+    arrayOperators.push(operator);
+    displayEquation();
+  } else if (operator === '=') {
+    if(validate()){
+        calculation();
     }
-    display.textContent += `${arrayNumbers[arrayNumbers.length - 1]}`;
+  } else if (operator === 'clear') {
+    clear();
+  } else{
+    for(let i = arrayBrackets.length; i < arrayOperators.length ; i++){
+        arrayBrackets.push('');
+    }
+    arrayBrackets.push(operator);
+    console.log('arrayOperators, arrayBrackets', arrayOperators, arrayBrackets);
+    displayEquation();
+  }
 }
 
+function validate() {
+    
+}
+
+// Clear function
+function clear() {
+  arrayNumbers = [0];
+  arrayOperators = [];
+  arrayBrackets = [];
+  displayEquation();
+}
+
+function displayEquation() {
+    let equation = "";
+    for (let i = 0; i < arrayNumbers.length - 1; i++) {
+        if (arrayBrackets[i] === '(') {
+            equation += arrayBrackets[i] + arrayNumbers[i].toString() + arrayOperators[i];
+        } else if (arrayBrackets[i] === ')') {
+            equation += arrayNumbers[i].toString() + arrayBrackets[i] + arrayOperators[i];
+        } else {
+            equation += arrayNumbers[i].toString() + arrayOperators[i];
+        }
+    }
+    equation += arrayNumbers[arrayNumbers.length - 1];
+    
+    // Display the equation in the "display" element
+    display.textContent = equation;
+}
+
+// Calculation function
 function calculation() {
-    for(let i = 0; i < arrayOperators.length; i++){
-        if(arrayOperators[i] == '*'){
-            arrayOperators.splice(i, 1);
-            arrayNumbers[i] *= arrayNumbers[i + 1];
-            arrayNumbers[i] = Math.round(arrayNumbers[i]);
-            arrayNumbers.splice(i + 1, 1);
-            displayEquation();
-            return;
-        }
+  for (let i = 0; i < arrayOperators.length; i++) {
+    const operator = arrayOperators[i];
+    if (operator in operatorsMap) {
+      const num1 = arrayNumbers[i];
+      const num2 = arrayNumbers[i + 1];
+      arrayNumbers[i] = operatorsMap[operator](num1, num2);
+      arrayNumbers.splice(i + 1, 1);
+      arrayOperators.splice(i, 1);
+      i--; // Decrement to recheck the current index after splice
     }
-    for(let i = 0; i < arrayOperators.length; i++){
-        if(arrayOperators[i] == '/'){
-            arrayOperators.splice(i, 1);
-            arrayNumbers[i] /= arrayNumbers[i + 1];
-            arrayNumbers[i] = Math.round(arrayNumbers[i]);
-            arrayNumbers.splice(i + 1, 1);
-            displayEquation();
-            return;
-        }
-    }
-    for(let i = 0; i < arrayOperators.length; i++){
-        if(arrayOperators[i] == '+'){
-            arrayOperators.splice(i, 1);
-            arrayNumbers[i] += arrayNumbers[i + 1];
-            arrayNumbers[i] = Math.round(arrayNumbers[i]);
-            arrayNumbers.splice(i + 1, 1);
-            displayEquation();
-            return;
-        }
-        if(arrayOperators[i] == '-'){
-            arrayOperators.splice(i, 1);
-            arrayNumbers[i] -= arrayNumbers[i + 1];
-            arrayNumbers[i] = Math.round(arrayNumbers[i]);
-            arrayNumbers.splice(i + 1, 1);
-            displayEquation();
-            return;
-        }
-    }
+  }
+  displayEquation();
 }
