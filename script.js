@@ -3,13 +3,18 @@ let arrayNumbers = [0];
 let arrayOperators = [];
 let arrayBrackets = [''];
 
-// Use an object to map operators to functions
-const operatorsMap = {
-  "+": (num1, num2) => num1 + num2,
-  "-": (num1, num2) => num1 - num2,
-  "*": (num1, num2) => num1 * num2,
-  "/": (num1, num2) => num1 / num2,
-};
+function operation(num1, num2, operator){
+    console.log(operator);
+    if(operator == '+'){
+        return num1+num2;
+    }else if(operator == '-'){
+        return num1-num2;
+    }else if(operator == '*'){
+        return num1*num2;
+    }else if(operator == '/'){
+        return num1/num2;
+    }
+}
 
 // Select elements using querySelector
 const calculator = document.querySelector('.calculator');
@@ -32,18 +37,29 @@ for (let i = 0; i < 10; i++) {
   numpad.appendChild(button);
 }
 
-// Create operator buttons using a loop
-const operatorMarksArray = ['(', ')', '+', '-', '*', '/', '=', 'clear'];
-const operatorMarks = operatorMarksArray.map((operatorMark) => {
-  const button = document.createElement('button');
-  button.classList.add('operator');
-  button.textContent = operatorMark;
-  button.addEventListener('click', () => {
-    handleOperatorClick(operatorMark);
-  });
-  operators.appendChild(button);
-  return button;
-});
+let operatorMarks = [];
+let operatorMarksArray = ['+', '-', '*', '/', '=', 'clear'];
+for(operatorMark of operatorMarksArray){
+    let i = operatorMarksArray.indexOf(operatorMark)
+    operatorMarks[i] = document.createElement('button');
+    operatorMarks[i].classList.add('operator');
+    operatorMarks[i].textContent = `${operatorMark}`;
+    operatorMarks[i].addEventListener('click', function(){
+        if(operatorMarksArray[i] != '=' && operatorMarksArray[i] != 'clear'){
+            arrayNumbers.push(0);
+            lastOperator = operatorMarksArray[i];
+            arrayOperators.push(lastOperator);
+            displayEquation();
+        }else if(operatorMarksArray[i] == '=') {
+            console.log(arrayOperators);
+            calculation();
+            displayEquation();
+        }else if(operatorMarksArray[i] == 'clear') {
+            clear();
+        }
+    });
+    operators.appendChild(operatorMarks[i]);
+}
 
 // Function to handle operator button click
 function handleOperatorClick(operator) {
@@ -98,16 +114,21 @@ function displayEquation() {
 
 // Calculation function
 function calculation() {
-  for (let i = 0; i < arrayOperators.length; i++) {
-    const operator = arrayOperators[i];
-    if (operator in operatorsMap) {
-      const num1 = arrayNumbers[i];
-      const num2 = arrayNumbers[i + 1];
-      arrayNumbers[i] = operatorsMap[operator](num1, num2);
-      arrayNumbers.splice(i + 1, 1);
-      arrayOperators.splice(i, 1);
-      i--; // Decrement to recheck the current index after splice
+    for(let i = 0; i < arrayOperators.length; i++){
+        if(arrayOperators[i] == '*' || arrayOperators[i] == '/'){
+            arrayNumbers[i] = operation(arrayNumbers[i], arrayNumbers[i + 1], arrayOperators[i]);
+            arrayOperators.splice(i, 1);
+            arrayNumbers.splice(i + 1, 1);
+            return;
+        }
     }
-  }
-  displayEquation();
+    for(let i = 0; i < arrayOperators.length; i++){
+        if(arrayOperators[i] == '+' || arrayOperators[i] == '-'){
+            arrayOperators.splice(i, 1);
+            arrayNumbers[i] = operation(arrayNumbers[i], arrayNumbers[i + 1], arrayOperators[i]);
+            arrayOperators.splice(i, 1);
+            arrayNumbers.splice(i + 1, 1);
+            return;
+        }
+    }
 }
