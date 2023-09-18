@@ -4,14 +4,15 @@ let lastOperator = "";
 arrayNumbers[arrayNumbers.length - 1]
 
 function operation(num1, num2, operator){
-    if(operator == "+"){
-        return add(num1, num2);
-    }else if(operator == "-"){
-        return subtract(num1, num2);
-    }else if(operator == "*"){
-        return multiply(num1, num2);
-    }else if(operator == "/"){
-        return divide(num1, num2);
+    console.log(operator);
+    if(operator == '+'){
+        return num1+num2;
+    }else if(operator == '-'){
+        return num1-num2;
+    }else if(operator == '*'){
+        return num1*num2;
+    }else if(operator == '/'){
+        return num1/num2;
     }
 }
 
@@ -47,7 +48,9 @@ for(operatorMark of operatorMarksArray){
             arrayOperators.push(lastOperator);
             displayEquation();
         }else if(operatorMarksArray[i] == '=') {
+            console.log(arrayOperators);
             calculation();
+            displayEquation();
         }else if(operatorMarksArray[i] == 'clear') {
             clear();
         }
@@ -72,40 +75,19 @@ function displayEquation(){
 
 function calculation() {
     for(let i = 0; i < arrayOperators.length; i++){
-        if(arrayOperators[i] == '*'){
+        if(arrayOperators[i] == '*' || arrayOperators[i] == '/'){
+            arrayNumbers[i] = operation(arrayNumbers[i], arrayNumbers[i + 1], arrayOperators[i]);
             arrayOperators.splice(i, 1);
-            arrayNumbers[i] *= arrayNumbers[i + 1];
-            arrayNumbers[i] = Math.round(arrayNumbers[i]);
             arrayNumbers.splice(i + 1, 1);
-            displayEquation();
             return;
         }
     }
     for(let i = 0; i < arrayOperators.length; i++){
-        if(arrayOperators[i] == '/'){
+        if(arrayOperators[i] == '+' || arrayOperators[i] == '-'){
             arrayOperators.splice(i, 1);
-            arrayNumbers[i] /= arrayNumbers[i + 1];
-            arrayNumbers[i] = Math.round(arrayNumbers[i]);
-            arrayNumbers.splice(i + 1, 1);
-            displayEquation();
-            return;
-        }
-    }
-    for(let i = 0; i < arrayOperators.length; i++){
-        if(arrayOperators[i] == '+'){
+            arrayNumbers[i] = operation(arrayNumbers[i], arrayNumbers[i + 1], arrayOperators[i]);
             arrayOperators.splice(i, 1);
-            arrayNumbers[i] += arrayNumbers[i + 1];
-            arrayNumbers[i] = Math.round(arrayNumbers[i]);
             arrayNumbers.splice(i + 1, 1);
-            displayEquation();
-            return;
-        }
-        if(arrayOperators[i] == '-'){
-            arrayOperators.splice(i, 1);
-            arrayNumbers[i] -= arrayNumbers[i + 1];
-            arrayNumbers[i] = Math.round(arrayNumbers[i]);
-            arrayNumbers.splice(i + 1, 1);
-            displayEquation();
             return;
         }
     }
