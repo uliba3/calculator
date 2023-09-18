@@ -124,7 +124,6 @@ function calculation() {
     }
     for(let i = 0; i < arrayOperators.length; i++){
         if(arrayOperators[i] == '+' || arrayOperators[i] == '-'){
-            arrayOperators.splice(i, 1);
             arrayNumbers[i] = operation(arrayNumbers[i], arrayNumbers[i + 1], arrayOperators[i]);
             arrayOperators.splice(i, 1);
             arrayNumbers.splice(i + 1, 1);
